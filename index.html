@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Custom Widget</title>
+    <style>
+    </style>
+
+
+    <!--    NOTE:   Dojo requires the 'dojoCOnfig' to be set before Dojo is loaded   -->
+    <script>
+        //let locationPath = location.pathname.replace(/\/[^\/]+$/, "");
+        //    NOTE:   no parsing when running from 'localhost'
+        let locationPath = location;
+        window.dojoConfig = {
+            packages: [
+                {
+                    name: "app",
+                    location: locationPath + "/app"
+                }
+            ]
+        };
+    </script>
+    <script src="https://js.arcgis.com/4.19/"></script>
+
+
+
+    <script>
+
+        //  error handling for the Dojo script loading
+        handle = require.on('error', function (error) {
+            console.log(error.message);
+        });      
+        require(["app/widget", "esri/intl"], (CustomWidget, intl) => {
+
+            // register and load any localization text
+            intl.registerMessageBundleLoader({
+                pattern: "custom-widget/assets/",
+                async fetchMessageBundle(bundleId, locale) {
+                    const [, filename] = bundleId.split("/translations/");
+                    const knownLocale = intl.normalizeMessageBundleLocale(locale);
+                    const bundlePath = `./assets/translations/${filename}_${knownLocale}.json`;
+                    const response = await fetch(bundlePath);
+                    return response.json();
+                }
+            });
+
+
+            //  create a new "CustomWidget" object
+            //  NOTE:   the widget will be rendered in the container 'widgetDiv'
+            const widget = new CustomWidget({
+                container: "widgetDiv"
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+    <div id="widgetDiv" class="esri-widget"></div>
+    <div id="container" class="esri-widget">
+        <div id="btnContainer"></div>
+    </div>
+    </body>
+</html>
+
